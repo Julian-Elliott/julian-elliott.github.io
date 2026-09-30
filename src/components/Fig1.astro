@@ -1,0 +1,124 @@
+---
+// Fig. 1 — a day of carbon intensity, half-hourly. Server-renders the entry's example day;
+// the script adds the day/grid toggles and a live fetch from NESO with the bundled snapshot as fallback.
+import days from '../data/days.json';
+const RAMP: Record<string, string> = { 'very low': '#DCE9EE', low: '#A9C9D5', moderate: '#6FA1B4', high: '#3B7690', 'very high': '#1E4A5E' };
+const CHART_MAX = 400;
+const series = days.sw.example as { t: string; v: number; i: string; f?: boolean }[];
+let mi = 0, ma = 0;
+series.forEach((h, k) => { if (h.v < series[mi].v) mi = k; if (h.v > series[ma].v) ma = k; });
+const pos = (k: number) => `left:${Math.min(84, Math.max(0, ((k + 0.5) / series.length) * 100 - 6)).toFixed(1)}%;top:${Math.max(-2, Math.round(180 * (1 - series[k].v / CHART_MAX)) - 16)}px`;
+---
+<figure class="fig" id="fig1" style="margin-bottom: 18px">
+  <div class="fig-h">
+    <span class="mono ink">Fig. 1 · <span id="fig1-title">South Wales, half-hourly forecast · 29 Sep 2026</span></span>
+    <div role="group" aria-label="Which day and grid" class="no-print" style="display: flex; gap: 6px; flex-wrap: wrap">
+      <button type="button" class="tog" data-mode="example" aria-pressed="true">29 Sep</button>
+      <button type="button" class="tog" data-mode="live" aria-pressed="false">Live</button>
+      <button type="button" class="tog" data-region="sw" aria-pressed="true">South Wales</button>
+      <button type="button" class="tog" data-region="gb" aria-pressed="false">GB national</button>
+    </div>
+  </div>
+  <div class="chart">
+    <div class="axis y" style="height: 180px"><span>400</span><span>300</span><span>200</span><span>100</span><span>0</span></div>
+    <div class="plot">
+      <div class="bars" id="fig1-bars" style="height: 180px">
+        {series.map((h) => <div class="bar" style={`height:${Math.round((h.v / CHART_MAX) * 100)}%;background:${RAMP[h.i]}`} title={`${h.t} · ${h.v} g/kWh · ${h.i}`}></div>)}
+        <span class="mono callout" id="fig1-min" style={pos(mi)}>{series[mi].v} g · {series[mi].t}</span>
+        <span class="mono callout" id="fig1-max" style={pos(ma)}>{series[ma].v} g · {series[ma].t}</span>
+      </div>
+      <div class="axis x"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div>
+    </div>
+  </div>
+  <div class="legend">
+    <span class="mono">NESO index</span>
+    {Object.entries(RAMP).map(([k, c]) => <span class="mono k"><i style={`background:${c}`}></i>{k}</span>)}
+  </div>
+  <figcaption class="figcap" id="fig1-cap"><b>The same socket, a factor of eighteen apart.</b> Forecast intensity ranged from 18 g/kWh at 09:30 to 322 g/kWh at 17:00. Source: NESO Carbon Intensity API, regional forecast, fetched 30 Sep 2026 22:05 UTC.</figcaption>
+</figure>
+<script type="application/json" id="fig1-data" set:html={JSON.stringify(days)}></script>
+
+<script>
+  type H = { t: string; v: number; i: string; f?: boolean };
+  const RAMP: Record<string, string> = { 'very low': '#DCE9EE', low: '#A9C9D5', moderate: '#6FA1B4', high: '#3B7690', 'very high': '#1E4A5E' };
+  const CHART_H = 180, CHART_MAX = 400;
+  const data = JSON.parse(document.getElementById('fig1-data')!.textContent || '{}');
+  const bars = document.getElementById('fig1-bars')!;
+  const cap = document.getElementById('fig1-cap')!;
+  const title = document.getElementById('fig1-title')!;
+  const state = { mode: 'example' as 'example' | 'live', region: 'sw' as 'sw' | 'gb' };
+  const live: { sw?: H[]; gb?: H[]; at?: string; failed?: boolean } = {};
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const hhmm = (iso: string) => { const d = new Date(iso); return `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`; };
+  const todayUTC = () => { const d = new Date(); return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`; };
+
+  async function fetchLive() {
+    // NESO's API is public, CORS-enabled and needs no key. Regional = forecast; national = actual where published.
+    const day = todayUTC();
+    const from = `${day}T00:00Z`;
+    const to = (() => { const d = new Date(from); d.setUTCDate(d.getUTCDate() + 1); return d.toISOString().slice(0, 16) + 'Z'; })();
+    try {
+      const [r, n] = await Promise.all([
+        fetch(`https://api.carbonintensity.org.uk/regional/intensity/${from}/${to}/regionid/7`).then((x) => x.json()),
+        fetch(`https://api.carbonintensity.org.uk/intensity/${from}/${to}`).then((x) => x.json()),
+      ]);
+      const rows = (r.data?.data || []).filter((p: any) => p.from >= from && p.from < to);
+      live.sw = rows.map((p: any) => ({ t: hhmm(p.from), v: p.intensity.forecast, i: p.intensity.index }));
+      live.gb = (n.data || []).filter((p: any) => p.from >= from && p.from < to).map((p: any) => ({ t: hhmm(p.from), v: p.intensity.actual ?? p.intensity.forecast, i: p.intensity.index, f: p.intensity.actual == null }));
+      live.at = new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC';
+      if (!live.sw.length || !live.gb.length) throw new Error('empty');
+    } catch (e) {
+      live.failed = true;
+    }
+    if (state.mode === 'live') render();
+  }
+
+  function series(): { s: H[]; label: string; snapshot: boolean } {
+    const d = data[state.region];
+    if (state.mode === 'example') return { s: d.example, label: '29 Sep 2026', snapshot: false };
+    const l = live[state.region];
+    if (l && !live.failed) return { s: l, label: `live · fetched ${live.at}`, snapshot: false };
+    return { s: d.live, label: `snapshot ${data.fetched.replace('T', ' ')} (live fetch unavailable)`, snapshot: true };
+  }
+
+  function render() {
+    const { s, label, snapshot } = series();
+    let mi = 0, ma = 0;
+    s.forEach((h, k) => { if (h.v < s[mi].v) mi = k; if (h.v > s[ma].v) ma = k; });
+    const mean = Math.round(s.reduce((a, h) => a + h.v, 0) / s.length);
+    const fc = s.filter((h) => h.f).length;
+    const pos = (k: number) => `left:${Math.min(84, Math.max(0, ((k + 0.5) / s.length) * 100 - 6)).toFixed(1)}%;top:${Math.max(-2, Math.round(CHART_H * (1 - s[k].v / CHART_MAX)) - 16)}px`;
+    bars.innerHTML = s.map((h) => `<div class="bar${h.f ? ' f' : ''}" style="height:${Math.round((h.v / CHART_MAX) * 100)}%;background:${RAMP[h.i] || '#1E5B73'}" title="${h.t} · ${h.v} g/kWh · ${h.i}"></div>`).join('')
+      + `<span class="mono callout" style="${pos(mi)}">${s[mi].v} g · ${s[mi].t}</span><span class="mono callout" style="${pos(ma)}">${s[ma].v} g · ${s[ma].t}</span>`;
+    const gb = state.region === 'gb', liveMode = state.mode === 'live';
+    title.textContent = `${gb ? 'GB national, measured where published, forecast otherwise' : 'South Wales, half-hourly forecast'} · ${label}`;
+    if (!liveMode && !gb) cap.innerHTML = '<b>The same socket, a factor of eighteen apart.</b> Forecast intensity ranged from 18 g/kWh at 09:30 to 322 g/kWh at 17:00. Source: NESO Carbon Intensity API, regional forecast, fetched 30 Sep 2026 22:05 UTC.';
+    else if (!liveMode && gb) cap.innerHTML = `<b>The same Monday, nationally.</b> Measured intensity ran from ${s[mi].v} g at ${s[mi].t} to ${s[ma].v} g at ${s[ma].t}, mean ${mean} g/kWh: lower and flatter than the South Wales forecast. A regional forecast and a national actual are different measurements of different things.`;
+    else cap.innerHTML = `<b>Today, as NESO currently has it.</b> Low ${s[mi].v} g at ${s[mi].t}, high ${s[ma].v} g at ${s[ma].t}, day mean ${mean} g/kWh${fc ? `; the last ${fc} periods (lighter bars) are still forecasts` : ''}. ${snapshot ? 'The live fetch failed, so this is the bundled snapshot; reload to try again.' : 'Fetched from the NESO API when this page loaded.'}`;
+    document.dispatchEvent(new CustomEvent('fig1:change', { detail: { series: s, mode: state.mode, region: state.region } }));
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('#fig1 .tog').forEach((b) => {
+    b.addEventListener('click', () => {
+      if (b.dataset.mode) state.mode = b.dataset.mode as any;
+      if (b.dataset.region) state.region = b.dataset.region as any;
+      document.querySelectorAll<HTMLButtonElement>('#fig1 .tog').forEach((x) => {
+        if (x.dataset.mode) x.setAttribute('aria-pressed', String(x.dataset.mode === state.mode));
+        if (x.dataset.region) x.setAttribute('aria-pressed', String(x.dataset.region === state.region));
+      });
+      render();
+    });
+  });
+  document.addEventListener('fig1:set', (e: any) => {
+    if (e.detail?.mode) state.mode = e.detail.mode;
+    if (e.detail?.region) state.region = e.detail.region;
+    document.querySelectorAll<HTMLButtonElement>('#fig1 .tog').forEach((x) => {
+      if (x.dataset.mode) x.setAttribute('aria-pressed', String(x.dataset.mode === state.mode));
+      if (x.dataset.region) x.setAttribute('aria-pressed', String(x.dataset.region === state.region));
+    });
+    render();
+  });
+  fetchLive();
+  render();
+</script>

@@ -1,0 +1,71 @@
+---
+// Top bar: navigation, "Read as" presets (a reader's question rearranges the copy), and the PDF export.
+---
+<nav class="nb-top" aria-label="Notebook">
+  <a class="wordmark" href="/#sheet-01">Julian Elliott</a>
+  <nav aria-label="Sections">
+    <a href="/#sheet-01">Notebook</a>
+    <a href="https://databased.business/">Datasheets ↗</a>
+    <a href="/#sheet-about">About</a>
+    <a href="https://github.com/Julian-Elliott">GitHub</a>
+    <label class="sans" for="read-as" style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted)">Read as
+      <select id="read-as" class="sel">
+        <option value="all">everything, in order</option>
+        <option value="story">the story</option>
+        <option value="trust">a sceptic</option>
+        <option value="home">someone at home</option>
+        <option value="work">a hiring manager</option>
+        <option value="source">someone reproducing it</option>
+        <option value="quick">two minutes</option>
+      </select>
+    </label>
+    <button type="button" class="pill" id="export-pdf" style="min-height: 36px; padding: 0 12px">Export PDF · this copy</button>
+  </nav>
+</nav>
+<div class="mono copyline"><span id="copy-summary">This copy · everything, in order</span><span class="link" id="copy-link"></span></div>
+
+<script>
+  // Presets: which sheets, prose, notes and ledgers a reader gets, and which figure state. Encoded in the URL hash
+  // so a configured copy can be linked and reproduced. Anything not a preset is "custom".
+  const ALL = { contents: true, s2: true, s3: true, about: true, prose: true, notes: true, ledger: true };
+  type Inc = typeof ALL;
+  const PRESETS: Record<string, { inc: Partial<Inc>; mode: 'example' | 'live'; region: 'sw' | 'gb'; label: string }> = {
+    all: { inc: {}, mode: 'example', region: 'sw', label: 'everything, in order' },
+    story: { inc: { contents: false, ledger: false, about: false }, mode: 'example', region: 'sw', label: 'the story' },
+    trust: { inc: { contents: false, s3: false, about: false }, mode: 'example', region: 'sw', label: 'a sceptic' },
+    home: { inc: { contents: false, s3: false, about: false, notes: false, ledger: false }, mode: 'live', region: 'sw', label: 'someone at home' },
+    work: { inc: {}, mode: 'example', region: 'sw', label: 'a hiring manager' },
+    source: { inc: { contents: false, about: false, prose: false, notes: false }, mode: 'example', region: 'sw', label: 'someone reproducing it' },
+    quick: { inc: { contents: false, s3: false, about: false, prose: false, notes: false, ledger: false }, mode: 'example', region: 'sw', label: 'two minutes' },
+  };
+  const sel = document.getElementById('read-as') as HTMLSelectElement;
+  const summary = document.getElementById('copy-summary')!;
+  const link = document.getElementById('copy-link')!;
+
+  function apply(q: string, fromHash = false) {
+    const p = PRESETS[q] || PRESETS.all;
+    const inc: Inc = { ...ALL, ...p.inc };
+    const b = document.body;
+    b.className = b.className.split(' ').filter((c) => !/^(q-|hide-|figs-only|no-notes|no-ledger)/.test(c)).join(' ');
+    b.classList.add(`q-${q}`);
+    if (!inc.contents) b.classList.add('hide-contents');
+    if (!inc.s2) b.classList.add('hide-s2');
+    if (!inc.s3) b.classList.add('hide-s3');
+    if (!inc.about) b.classList.add('hide-about');
+    if (!inc.prose) b.classList.add('figs-only');
+    if (!inc.notes) b.classList.add('no-notes');
+    if (!inc.ledger) b.classList.add('no-ledger');
+    document.dispatchEvent(new CustomEvent('fig1:set', { detail: { mode: p.mode, region: p.region } }));
+    const sheets = ['contents', 's2', 's3', 'about'].filter((k) => (inc as any)[k]).length;
+    summary.textContent = `This copy · ${p.label} · ${sheets} sheet${sheets === 1 ? '' : 's'} · ${inc.prose ? 'prose on' : 'figures only'} · notes ${inc.notes ? 'on' : 'off'} · ledger ${inc.ledger ? 'on' : 'off'}`;
+    const href = `${location.origin}${location.pathname}#q=${q}`;
+    link.textContent = href;
+    if (sel.value !== q) sel.value = q;
+    if (!fromHash) history.replaceState(null, '', `#q=${q}`);
+  }
+  sel.addEventListener('change', () => apply(sel.value));
+  const fromHash = () => { const m = location.hash.match(/q=([a-z]+)/); apply(m ? m[1] : 'all', true); };
+  window.addEventListener('hashchange', fromHash);
+  fromHash();
+  document.getElementById('export-pdf')!.addEventListener('click', () => window.print());
+</script>

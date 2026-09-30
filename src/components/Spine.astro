@@ -1,0 +1,80 @@
+---
+// The spine: a real time series drawn vertically, entries pinned to the dates they are about.
+// Data: src/data/spine.json — daily mean GB carbon intensity from NESO, refreshed by scripts/refresh_spine.py.
+import spine from '../data/spine.json';
+
+interface Pin { date: string; label: string; href: string }
+interface Props { pins: Pin[]; bracket?: { from: string; to: string; label: string } }
+const { pins, bracket } = Astro.props;
+
+const days = spine as { d: string; v: number }[];
+const n = days.length;
+const barH = Math.max(2, Math.floor(716 / n));
+const trackH = n * barH;
+const maxV = 270;
+const idx = (date: string) => (date < days[0].d ? -1 : days.findIndex((d) => d.d >= date));
+const fmtMonth = (d: string) => new Date(d + 'T00:00Z').toLocaleString('en-GB', { month: 'short', timeZone: 'UTC' });
+const fmtRange = (d: string) => new Date(d + 'T00:00Z').toLocaleString('en-GB', { month: 'short', year: '2-digit', timeZone: 'UTC' });
+const months: { label: string; top: number }[] = [];
+let last = '';
+days.forEach((d, i) => {
+  const m = d.d.slice(0, 7);
+  if (m !== last) { last = m; months.push({ label: fmtMonth(d.d) + (m.endsWith('-01') ? ' ' + m.slice(2, 4) : ''), top: i * barH - 5 }); }
+});
+const b0 = bracket ? idx(bracket.from) : -1;
+const b1 = bracket ? idx(bracket.to) : -1;
+const placedPins = pins.filter((p) => idx(p.date) >= 0).map((p) => ({ ...p, top: idx(p.date) * barH - 11 }));
+const range = `${fmtRange(days[0].d)} → ${fmtRange(days[n - 1].d)}`;
+---
+<aside class="spine" aria-label={`Spine: GB grid carbon intensity, daily mean, ${range}`} data-track-h={trackH}>
+  <div class="head">
+    <div class="mono ink">Spine · GB grid carbon intensity</div>
+    <div class="mono">Daily mean · gCO₂/kWh · NESO</div>
+    <div class="mono">{range}</div>
+  </div>
+  <div class="spine-track" style={`height:${trackH + 60}px`}>
+    <div class="rail"></div>
+    <div class="bars" aria-hidden="true">
+      {days.map((d) => <div class="sp-bar" style={`height:${barH}px;width:${Math.max(1, Math.round((d.v / maxV) * 1000) / 10)}%`}></div>)}
+    </div>
+    {months.map((m) => <div class="sp-month" style={`top:${m.top}px`}>{m.label}</div>)}
+    {bracket && b1 > 0 && (
+      <div class="sp-bracket" style={`top:${Math.max(0, b0) * barH}px;height:${Math.max(0, (b1 - Math.max(0, b0)) * barH)}px`}>
+        <span class="mono">{bracket.label}</span>
+      </div>
+    )}
+    {placedPins.map((p) => <a class="sp-pin" href={p.href} style={`top:${p.top}px`}><i></i><span>{p.label}</span></a>)}
+    <div class="sp-marker" id="spine-marker" style="top:0px"><span class="mono">you are here</span></div>
+  </div>
+  <div class="spine-strip" aria-hidden="true">
+    <div class="bars">{days.map((d) => <i style={`height:${Math.max(1, Math.round((d.v / maxV) * 100))}%`}></i>)}</div>
+    <div class="mono x"><span>{fmtRange(days[0].d)}</span><span>{fmtRange(days[n - 1].d)}</span></div>
+  </div>
+</aside>
+
+<script>
+  // Parallax minimap: the spine drifts slower than the sheets; the marker tracks reading position in time.
+  const spine = document.querySelector<HTMLElement>('.spine');
+  const track = document.querySelector<HTMLElement>('.spine-track');
+  const marker = document.getElementById('spine-marker');
+  if (spine && track && marker) {
+    const trackH = Number(spine.dataset.trackH || 716);
+    const trackTop = 100;
+    let raf = 0;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const update = () => {
+      raf = 0;
+      const vh = window.innerHeight, dh = document.documentElement.scrollHeight;
+      const progress = Math.max(0, Math.min(1, window.scrollY / Math.max(1, dh - vh)));
+      const slot = Math.max(240, vh - trackTop - 24);
+      const overflow = Math.max(0, trackH + 60 - slot);
+      track.style.transform = `translateY(${(-overflow * progress).toFixed(1)}px)`;
+      marker.style.top = `${Math.round(progress * trackH)}px`;
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    if (!reduce) track.style.transition = 'transform .08s linear';
+    update();
+  }
+</script>

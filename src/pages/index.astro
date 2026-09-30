@@ -1,0 +1,244 @@
+---
+import Base from '../layouts/Base.astro';
+import Spine from '../components/Spine.astro';
+import TopBar from '../components/TopBar.astro';
+import Fig1 from '../components/Fig1.astro';
+
+const FETCHED = '30 Sep 2026 22:05 UTC';
+const pins = [
+  { date: '2026-09-29', label: 'The grid, one Monday', href: '#sheet-02' },
+  { date: '2026-03-20', label: 'Two seasons (spring)', href: '#sheet-03' },
+  { date: '2025-11-20', label: 'Study begins', href: '#sheet-03' },
+];
+const bracket = { from: '2025-11-20', to: '2026-08-12', label: 'Heating study · two dwellings' };
+---
+<Base title="Julian Elliott — lab notebook" description="Measure it. Model it. Try to break the model. Notes on a heating system, the electricity grid, one solar panel and the occasional game, with the data attached and a ledger of the claims that didn't survive.">
+<div class="nb-root">
+  <Spine pins={pins} bracket={bracket} />
+  <div style="display: flex; flex-direction: column; min-width: 0">
+    <TopBar />
+    <main id="main" class="sheets">
+
+      <!-- ============ Sheet 01 · Contents ============ -->
+      <article class="sheet" id="sheet-01" aria-labelledby="t1">
+        <div class="rh"><span class="mono">Julian Elliott · Lab notebook</span><span class="mono">Sheet 01</span></div>
+        <div class="body">
+          <div class="mono warm" style="margin-bottom: 18px">A lab notebook, kept in public</div>
+          <h1 id="t1" class="display h1" style="font-size: 62px; max-width: 620px">Measure it. Model it. Try to break the model.</h1>
+          <p class="lead" style="margin-top: 24px; max-width: 600px">Notes on a heating system, the electricity grid, one solar panel and the occasional game. Each entry carries its data, the checks I ran, and a ledger of the claims that didn’t survive.</p>
+
+          <div class="author">
+            <img src="/julian.jpg" alt="Julian Elliott beside a climbing wall" width="88" height="88" />
+            <div style="font-size: 15px; line-height: 1.5">
+              <div style="font-weight: 600">Julian Elliott</div>
+              <div style="color: var(--ink-2)">Application Support Engineer, Cardiff · MSc Data Analytics, University of Huddersfield (dissertation in progress)</div>
+              <div class="mono links"><a href="https://github.com/Julian-Elliott">GitHub</a><a href="https://www.linkedin.com/in/julianelliott/">LinkedIn</a><a href="mailto:julianpaulelliott@icloud.com">Email</a><a href="https://databased.business/">Datasheets ↗</a></div>
+            </div>
+          </div>
+
+          <aside class="mn"><span class="mono">How to read the margin</span>Every figure gets a provenance note, every number its arithmetic, every decision the assumption it leans on, and every entry the amendments since it was first published. Nothing in the margin adds a claim; it shows how the ones on the sheet were made, and links the exact rows behind them.</aside>
+          <div class="mono ink" style="margin-bottom: 10px">How an entry works</div>
+          <div class="steps">
+            <div class="step"><span class="mono">01 · Observation</span>Something in the data doesn’t add up.</div>
+            <div class="step"><span class="mono">02 · Model</span>The simplest mechanism that would explain it.</div>
+            <div class="step"><span class="mono">03 · Test</span>A check that could prove the model wrong.</div>
+            <div class="step"><span class="mono">04 · Survived?</span>What’s left after the test, and its limits.</div>
+            <div class="step"><span class="mono">05 · Ledger</span>The claims I dropped, dated, with the reason.</div>
+          </div>
+
+          <aside class="mn"><span class="mono">The spine, left</span>GB grid carbon intensity, daily mean, from NESO. It is a dataset on this notebook’s shelf (DS-001) and the time axis for everything here: entries pin to the dates they are about, and scrolling moves you through the year.</aside>
+          <div class="mono ink" style="margin-bottom: 10px">Contents</div>
+          <table class="tbl">
+            <thead><tr><th>No.</th><th>Entry</th><th>Data</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td class="n">02</td><td><a href="#sheet-02">The grid, one Monday</a> — South Wales, 29 September 2026</td><td class="n"><a href="https://databased.business/datasheets/ds-001/">DS-001</a></td><td><span class="chip on">Published</span></td></tr>
+              <tr><td class="n">03</td><td><a href="#sheet-03">The heating has two seasons</a> — a regime change in spring and autumn</td><td class="n">DS-003</td><td><span class="chip warm">In progress</span></td></tr>
+              <tr><td class="n">04</td><td>Flow rate from two thermometers — estimated from flow and return alone, checked in the field</td><td class="n">DS-003</td><td><span class="chip warm">In progress</span></td></tr>
+              <tr><td class="n">05</td><td>The retraction ledger — every claim I’ve dropped, and what killed it</td><td class="n">—</td><td><span class="chip">Living</span></td></tr>
+              <tr><td class="n">06</td><td>Two clocks — when a value was measured versus when it was recorded</td><td class="n">DS-003</td><td><span class="chip">Draft</span></td></tr>
+              <tr><td class="n">07</td><td>Can paperclips become a game? — <a href="https://github.com/Julian-Elliott/stationary_manager">CTRL+ALT+DELIVER</a></td><td class="n">—</td><td><span class="chip">Planned</span></td></tr>
+              <tr><td class="n">08</td><td>A GitHub profile you can wear — <a href="https://github.com/Julian-Elliott/badger2040/blob/main/badger_os/examples/github_badge.py">an e-ink badge on Pimoroni’s Badger 2040</a></td><td class="n">—</td><td><span class="chip">Planned</span></td></tr>
+              <tr><td class="n">A</td><td><a href="#sheet-about">About &amp; experience</a></td><td class="n">—</td><td><span class="chip on">Published</span></td></tr>
+            </tbody>
+          </table>
+          <p class="keep" style="font-size: 14px; color: var(--muted); margin-top: 14px">Data codes point at datasheets on <a href="https://databased.business/">databased.business</a>, where each dataset can be read, queried in the browser and downloaded. The spine on the left is one of them.</p>
+        </div>
+        <div class="sf"><span class="mono">Printed from julian-elliott.github.io · data fetched {FETCHED}</span><a class="mono" href="#sheet-02">Next: the grid, one Monday →</a></div>
+      </article>
+
+      <!-- ============ Sheet 02 · The grid, one Monday ============ -->
+      <article class="sheet" id="sheet-02" aria-labelledby="t2">
+        <div class="rh"><span class="mono">01 · Signals</span><span class="mono">Sheet 02</span></div>
+        <div class="body">
+          <div class="mono meta"><span>29 September 2026</span><span>South Wales</span><span>Data · <a href="https://databased.business/datasheets/ds-001/">DS-001</a></span><span>Code · <a href="https://github.com/Julian-Elliott/grid-carbon-analysis">grid-carbon-analysis</a></span></div>
+          <h2 id="t2" class="display h2x" style="font-size: 48px">The grid, one Monday.</h2>
+          <p class="lead" style="margin-top: 16px">How dirty was the electricity coming into the house on Monday, and when would that have mattered?</p>
+          <p>NESO publishes a forecast of the carbon intensity of electricity for seventeen regions of Great Britain, every half hour, in grams of CO₂ per kilowatt-hour. This is Monday 29 September 2026 for South Wales, the distribution region that includes Cardiff.</p>
+
+          <aside class="mn"><span class="mono">Provenance · Fig. 1</span>
+            <table><tbody>
+              <tr><td class="k">Source</td><td>NESO Carbon Intensity API, regional forecast, region 7</td></tr>
+              <tr><td class="k">Fetched</td><td>{FETCHED} (live state: on page load)</td></tr>
+              <tr><td class="k">Rows</td><td>48 half-hour periods, values as served, no transform</td></tr>
+              <tr><td class="k">Kind</td><td>Forecast. NESO publishes measured values nationally only</td></tr>
+              <tr><td class="k">Dataset</td><td><a href="https://databased.business/datasheets/ds-001/">DS-001 v1</a> · CC BY 4.0</td></tr>
+            </tbody></table>
+            <span style="display: block; margin-top: 6px"><a href="https://databased.business/datasheets/ds-001/#download">The rows · Parquet, CSV</a> · <a href="https://databased.business/datasheets/ds-001/#explore">Run the query</a></span>
+          </aside>
+          <Fig1 />
+
+          <aside class="mn"><span class="mono">Arithmetic · the two means</span>Seven periods each, inclusive.<span class="sum">09:00–12:00  57+18+27+35+58+55+89
+= 339 ÷ 7 = 48.4
+16:30–19:30  311+322+317+316+316+295+289
+= 2166 ÷ 7 = 309.4   ratio 6.4</span>Every number in the prose is one of these or read straight off the chart.</aside>
+          <aside class="mn warm"><span class="mono">Assumption · average is not marginal</span>NESO’s figure is the average intensity of everything generating. The emissions caused by <i>adding</i> a load depend on the plant that ramps up to meet it, which in Britain is usually gas. So shifting a dishwasher saves less than the 6× suggests. The direction holds; the size doesn’t. Logged in the ledger as weakened.</aside>
+          <div class="two">
+            <div>
+              <h3 class="h2" style="margin-top: 0">What the day shows.</h3>
+              <p>Between 09:00 and 12:00 the mean was 48 g/kWh. Between 16:30 and 19:30 it was 309 g — six and a half times higher. The low point came with wind at 66% and solar at 21% of the regional mix; at the high point, gas was 82%.</p>
+              <h3 class="h2">The decision.</h3>
+              <p>Anything that can move — a dishwasher, a car on charge, a batch job — did six times less damage in late morning than in the evening peak. On this Monday. Whether that holds across a year of Mondays is the question DS-001 exists to answer, and the claim stays in the ledger as untested until it does.</p>
+            </div>
+            <div>
+              <aside class="note"><span class="mono">gCO₂/kWh</span>Grams of carbon dioxide per kilowatt-hour of electricity delivered. A kettle boil is roughly 0.1 kWh.</aside>
+              <aside class="note"><span class="mono">Forecast, not actual</span>NESO publishes measured (“actual”) intensity nationally only. Regional figures are model forecasts.</aside>
+            </div>
+          </div>
+
+          <figure class="fig">
+            <div class="mono ink" style="margin-bottom: 10px">Fig. 2 · South Wales generation mix at the two extremes, 29 Sep 2026</div>
+            <div class="stack">
+              <div class="row"><span class="mono">09:30 · 18 g</span><div class="segs"><div style="width: 66.2%; background: #1F7FB5"></div><div style="width: 21.3%; background: #B9830E"></div><div style="width: 7%; background: #8A5FB8"></div><div style="width: 4.3%; background: #B8532A"></div><div style="width: 1.2%; background: #A9A79F"></div></div></div>
+              <div class="row"><span class="mono">17:00 · 322 g</span><div class="segs"><div style="width: 17%; background: #1F7FB5"></div><div style="width: 1.2%; background: #B9830E"></div><div style="width: 81.8%; background: #B8532A"></div></div></div>
+            </div>
+            <div class="legend">
+              <span class="mono k"><i style="background: #1F7FB5; width: 10px"></i>wind</span>
+              <span class="mono k"><i style="background: #B9830E; width: 10px"></i>solar</span>
+              <span class="mono k"><i style="background: #8A5FB8; width: 10px"></i>nuclear</span>
+              <span class="mono k"><i style="background: #B8532A; width: 10px"></i>gas</span>
+              <span class="mono k"><i style="background: #A9A79F; width: 10px"></i>biomass, imports</span>
+            </div>
+            <figcaption class="figcap">Percent of regional generation, NESO forecast mix. Hydro, coal and “other” were 0% in both periods.</figcaption>
+          </figure>
+
+          <!-- Question blocks: revealed by "Read as" -->
+          <div class="qblock" data-q="home" id="home-answer">
+            <div class="mono" style="margin-bottom: 8px">Today’s answer · from the series shown in Fig. 1</div>
+            <p class="keep" style="margin: 0 0 8px"><b id="home-best">Cheapest three hours that day: 09:00–12:00, averaging 42 g/kWh.</b></p>
+            <p class="keep" style="margin: 0; font-size: 14px; color: var(--ink-2)"><span id="home-worst">Dearest: 16:30–19:30 at 313 g/kWh, a factor of 7.5.</span> Forecast, not a guarantee: NESO revises the day as it goes, and this is the grid, not your meter.</p>
+          </div>
+          <div class="qblock" data-q="trust">
+            <div class="mono" style="margin-bottom: 8px">How this figure was checked</div>
+            <table class="tbl" style="font-size: 14px"><tbody>
+              <tr><td class="n">Fetched</td><td>{FETCHED}, from api.carbonintensity.org.uk, regional endpoint, region 7. The live state re-fetches when the page loads.</td></tr>
+              <tr><td class="n">What it is</td><td>NESO’s forecast for the region. Measured values exist nationally only; switch the figure to GB national to see them.</td></tr>
+              <tr><td class="n">Not rerun</td><td>The 09:00–12:00 and 16:30–19:30 means are arithmetic on the 48 fetched values; nothing here is modelled by me.</td></tr>
+              <tr><td class="n">Untested</td><td>Claims 1 and 2 in the ledger below. “Untested” means the check is named but hasn’t been run, not that I doubt it.</td></tr>
+            </tbody></table>
+          </div>
+          <div class="qblock" data-q="work">
+            <div class="mono" style="margin-bottom: 8px">This entry, step by step</div>
+            <table class="tbl" style="font-size: 14px"><tbody>
+              <tr><td class="n">01 · Observation</td><td>The same socket, 18 g in the morning and 322 g in the evening.</td></tr>
+              <tr><td class="n">02 · Model</td><td>Intensity follows the generation mix: wind and solar low, gas high.</td></tr>
+              <tr><td class="n">03 · Test</td><td>Look at the mix at both extremes. If gas isn’t the difference, the model is wrong.</td></tr>
+              <tr><td class="n">04 · Survived?</td><td>For this day, yes: 4% gas at the trough, 82% at the peak. For a year of days: not yet tested.</td></tr>
+              <tr><td class="n">05 · Ledger</td><td>Two claims logged as untested with the test that would settle each; one weakened by the margin review.</td></tr>
+            </tbody></table>
+          </div>
+          <div class="qblock" data-q="source">
+            <div class="mono" style="margin-bottom: 8px">Data and code behind this sheet</div>
+            <table class="tbl" style="font-size: 14px"><tbody>
+              <tr><td class="n">Dataset</td><td><a href="https://databased.business/datasheets/ds-001/">DS-001 · GB electricity carbon intensity</a> — Parquet, CSV, datapackage.json, query in the browser.</td></tr>
+              <tr><td class="n">Endpoint</td><td>api.carbonintensity.org.uk/regional/intensity/&#123;from&#125;/&#123;to&#125;/regionid/7 · CC BY 4.0, attribute NESO.</td></tr>
+              <tr><td class="n">Code</td><td><a href="https://github.com/Julian-Elliott/grid-carbon-analysis">grid-carbon-analysis</a> — notebooks, and <a href="https://github.com/Julian-Elliott/julian-elliott.github.io">this site’s repository</a> for the figure and fetch code.</td></tr>
+              <tr><td class="n">This copy</td><td>data fetched {FETCHED}.</td></tr>
+            </tbody></table>
+          </div>
+
+          <aside class="mn"><span class="mono">Uncertainty · how wrong was the forecast?</span>Regional forecasts can’t be scored (no regional actuals). Nationally on the same Monday, forecast against measured: mean absolute error 12 g/kWh, 41 of 48 periods within 20 g, largest miss 33 g at 16:00 (forecast 107, measured 140). Measured ran above forecast by 7.5 g on average.</aside>
+          <h3 class="h2">What this doesn’t show.</h3>
+          <p>One day, one region, one forecast. The intensity figures come from NESO’s model of the generation mix, not from metered emissions, and the index bands (very low to very high) are NESO’s categories, which it revises. Nothing here says what the house actually drew.</p>
+
+          <aside class="mn"><span class="mono">Amendments · this sheet</span>
+            <table><tbody>
+              <tr><td class="k">v1</td><td>30 Sep 2026 · first published</td></tr>
+              <tr><td class="k">v1.1</td><td>30 Sep 2026 · margin review: added the average-vs-marginal note; claim 3 added to the ledger as weakened</td></tr>
+            </tbody></table>
+            <span style="display: block; margin-top: 6px"><a href="https://github.com/Julian-Elliott/julian-elliott.github.io/commits/main">Every change is a commit with a reason →</a></span>
+          </aside>
+          <div class="ledger">
+            <div class="mono ink" style="margin-bottom: 8px">Ledger · claims from this entry</div>
+            <table class="tbl" style="font-size: 14px">
+              <thead><tr><th>Claim</th><th>Test</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>Late morning beats the evening peak by 6× in South Wales</td><td>Repeat over 12 months of days (DS-001)</td><td><span class="chip warm">Untested</span></td></tr>
+                <tr><td>The evening peak is gas</td><td>Mix at the daily maximum, every day</td><td><span class="chip warm">Untested</span></td></tr>
+                <tr><td>Shifting a load from the evening peak to late morning cuts its emissions 6×</td><td>Compare average with marginal intensity for the same periods (needs a marginal series, not this dataset)</td><td><span class="chip warm">Weakened</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="sf"><a class="mono" href="#sheet-01">← Contents</a><a class="mono" href="#sheet-03">Next: the heating has two seasons →</a></div>
+      </article>
+
+      <!-- ============ Sheet 03 · The heating has two seasons ============ -->
+      <article class="sheet short" id="sheet-03" aria-labelledby="t3">
+        <div class="rh"><span class="mono">01 · Signals</span><span class="mono">Sheet 03</span></div>
+        <div class="body">
+          <div class="mono meta"><span>Nov 2025 → Aug 2026</span><span>Two dwellings</span><span>Data · DS-003 (sanitising)</span></div>
+          <h2 id="t3" class="display h2x" style="font-size: 48px">The heating has two seasons.</h2>
+          <p class="lead" style="margin-top: 16px">Flow and return temperatures from two houses across a heating year. Somewhere in spring, and again in autumn, the system changes regime.</p>
+          <aside class="mn"><span class="mono">What will be released · DS-003</span>Thermal series only: flow, return, room and outdoor temperatures, boiler state where recorded. Identifiers stripped. Location coarsened to about 10 km and weather refetched at that point. No phone, person or zone entities. Supplier consumption daily, not half-hourly, so occupancy isn’t readable. The second dwelling only with its household’s consent. Raw captures never enter the repository.</aside>
+          <div class="note cool"><span class="mono">Status</span>In progress. The write-up comes first; the sanitised dataset follows it. The figure below is a labelled placeholder, not a drawing.</div>
+          <div class="fig">
+            <div class="mono ink" style="margin-bottom: 10px">Fig. 3 · Flow and return temperature, dwelling A, one week either side of the spring change</div>
+            <div class="ph">[ Figure from the sanitised release · DS-003 ]<br />flow °C · return °C · outdoor °C</div>
+          </div>
+          <p>The method is the same as every entry here. I read the literature first, wrote down what I thought was new, then used an AI reviewer adversarially to try to disprove each claim. Most of them didn’t survive. The ones that did are the entry; the ones that didn’t are in the ledger, with the test that killed them.</p>
+        </div>
+        <div class="sf"><a class="mono" href="#sheet-02">← The grid, one Monday</a><a class="mono" href="#sheet-about">About &amp; experience →</a></div>
+      </article>
+
+      <!-- ============ Sheet A · About & experience ============ -->
+      <article class="sheet short" id="sheet-about" aria-labelledby="ta">
+        <div class="rh"><span class="mono">The person behind the notes</span><span class="mono">Sheet A</span></div>
+        <div class="body">
+          <h2 id="ta" class="display h2x" style="font-size: 48px">About &amp; experience.</h2>
+          <p class="lead" style="margin-top: 16px">Application Support Engineer in Cardiff, with a background in customer-facing technology, automation and analysis, and a habit of putting sensors on things.</p>
+          <aside class="mn"><span class="mono">Elsewhere</span><a href="https://www.linkedin.com/in/julianelliott/">LinkedIn</a> for dates and detail · <a href="https://github.com/Julian-Elliott">GitHub</a> for the code · <a href="https://databased.business/">databased.business</a> for the datasets · <a href="mailto:julianpaulelliott@icloud.com">email</a> for an interesting problem.</aside>
+          <p>I work on the systems that credit and receivables businesses run on: SQL-based data fixes, Oracle and PostgreSQL, triage, root cause, and the explaining that follows. Before that, John Lewis: eleven years across technology sales, customer delivery resolution and automation, where the questions were the same and the tools were different.</p>
+          <div class="career"><div class="when">Now</div><div><h3>Application Support Engineer</h3><p>Cardiff · Making systems easier to understand, use and fix; the thread running through this notebook.</p></div></div>
+          <div class="career"><div class="when">2021–2024</div><div><h3>Automation Senior Analyst</h3><p>John Lewis Partnership · Automation, dashboards and mentoring, with an eye on the work people needed to get done.</p></div></div>
+          <div class="career"><div class="when">2020–2021</div><div><h3>Customer Delivery Resolution Partner</h3><p>John Lewis Partnership · Resolving operational problems and improving the process around them.</p></div></div>
+          <div class="career"><div class="when">2013–2020</div><div><h3>Technology Selling Partner</h3><p>John Lewis Partnership · Helping customers understand technology and sharing product knowledge with colleagues.</p></div></div>
+          <div class="career"><div class="when">2024–2026</div><div><h3>MSc Data Analytics</h3><p>University of Huddersfield · Dissertation in progress: domestic heating data from metered dwellings.</p></div></div>
+          <h3 class="h2">Away from the screen.</h3>
+          <p>I climb, walk along canals, grow vegetables and make things: 3D printing, electronics, furniture, a guitar now and then. Some of those things eventually acquire a circuit board. Others are just a good way to spend an afternoon.</p>
+        </div>
+        <div class="sf"><a class="mono" href="#sheet-01">← Contents</a><a class="mono" href="mailto:julianpaulelliott@icloud.com">Say hello →</a></div>
+      </article>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  // "Someone at home" block: best and worst three-hour windows, recomputed from whatever Fig. 1 shows.
+  document.addEventListener('fig1:change', (e: any) => {
+    const s: { t: string; v: number }[] = e.detail.series;
+    const live = e.detail.mode === 'live';
+    const win = 6;
+    let bi = 0, wi = 0, bm = Infinity, wm = -Infinity;
+    for (let k = 0; k + win <= s.length; k++) {
+      const m = s.slice(k, k + win).reduce((a, h) => a + h.v, 0) / win;
+      if (m < bm) { bm = m; bi = k; }
+      if (m > wm) { wm = m; wi = k; }
+    }
+    const span = (k: number) => `${s[k].t}–${s[Math.min(s.length - 1, k + win)].t}`;
+    const best = document.getElementById('home-best'), worst = document.getElementById('home-worst');
+    if (best) best.textContent = `Cheapest three hours ${live ? 'today' : 'that day'}: ${span(bi)}, averaging ${Math.round(bm)} g/kWh.`;
+    if (worst) worst.textContent = `Dearest: ${span(wi)} at ${Math.round(wm)} g/kWh, a factor of ${(wm / Math.max(1, bm)).toFixed(1)}.`;
+  });
+</script>
+</Base>
