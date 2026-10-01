@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "version": "1.0.0",
-  "description": "Julian Elliott — lab notebook (julian-elliott.github.io)",
+  "description": "Julian Elliott · lab notebook (julian-elliott.github.io)",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
