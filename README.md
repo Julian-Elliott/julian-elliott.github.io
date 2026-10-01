@@ -1,4 +1,4 @@
-# Julian Elliott — lab notebook
+# Julian Elliott · lab notebook
 
 The source of [julian-elliott.github.io](https://julian-elliott.github.io/): a notebook of investigations,
 kept in public. Each entry is an A4 sheet with its data, the checks that were run, margin notes on
