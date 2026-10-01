@@ -64,8 +64,9 @@ const pos = (k: number) => `left:${Math.min(84, Math.max(0, ((k + 0.5) / series.
         fetch(`https://api.carbonintensity.org.uk/intensity/${from}/${to}`).then((x) => x.json()),
       ]);
       const rows = (r.data?.data || []).filter((p: any) => p.from >= from && p.from < to);
-      live.sw = rows.map((p: any) => ({ t: hhmm(p.from), v: p.intensity.forecast, i: p.intensity.index }));
-      live.gb = (n.data || []).filter((p: any) => p.from >= from && p.from < to).map((p: any) => ({ t: hhmm(p.from), v: p.intensity.actual ?? p.intensity.forecast, i: p.intensity.index, f: p.intensity.actual == null }));
+      const band = (i: unknown) => (typeof i === 'string' && i in RAMP ? i : 'moderate');
+      live.sw = rows.map((p: any) => ({ t: hhmm(p.from), v: num(p.intensity?.forecast), i: band(p.intensity?.index) }));
+      live.gb = (n.data || []).filter((p: any) => p.from >= from && p.from < to).map((p: any) => ({ t: hhmm(p.from), v: num(p.intensity?.actual ?? p.intensity?.forecast), i: band(p.intensity?.index), f: p.intensity?.actual == null }));
       live.at = new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC';
       if (!live.sw.length || !live.gb.length) throw new Error('empty');
     } catch (e) {
@@ -82,6 +83,10 @@ const pos = (k: number) => `left:${Math.min(84, Math.max(0, ((k + 0.5) / series.
     return { s: d.live, label: `snapshot ${data.fetched.replace('T', ' ')} (live fetch unavailable)`, snapshot: true };
   }
 
+  // Values fetched from the API are third-party input: escape them before they reach the DOM.
+  const esc = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
+  const num = (v: unknown) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+
   function render() {
     const { s, label, snapshot } = series();
     let mi = 0, ma = 0;
@@ -89,13 +94,13 @@ const pos = (k: number) => `left:${Math.min(84, Math.max(0, ((k + 0.5) / series.
     const mean = Math.round(s.reduce((a, h) => a + h.v, 0) / s.length);
     const fc = s.filter((h) => h.f).length;
     const pos = (k: number) => `left:${Math.min(84, Math.max(0, ((k + 0.5) / s.length) * 100 - 6)).toFixed(1)}%;top:${Math.max(-2, Math.round(CHART_H * (1 - s[k].v / CHART_MAX)) - 16)}px`;
-    bars.innerHTML = s.map((h) => `<div class="bar${h.f ? ' f' : ''}" style="height:${Math.round((h.v / CHART_MAX) * 100)}%;background:${RAMP[h.i] || '#1E5B73'}" title="${h.t} · ${h.v} g/kWh · ${h.i}"></div>`).join('')
-      + `<span class="mono callout" style="${pos(mi)}">${s[mi].v} g · ${s[mi].t}</span><span class="mono callout" style="${pos(ma)}">${s[ma].v} g · ${s[ma].t}</span>`;
+    bars.innerHTML = s.map((h) => `<div class="bar${h.f ? ' f' : ''}" style="height:${Math.round((num(h.v) / CHART_MAX) * 100)}%;background:${RAMP[h.i] || '#1E5B73'}" title="${esc(h.t)} · ${num(h.v)} g/kWh · ${esc(h.i)}"></div>`).join('')
+      + `<span class="mono callout" style="${pos(mi)}">${num(s[mi].v)} g · ${esc(s[mi].t)}</span><span class="mono callout" style="${pos(ma)}">${num(s[ma].v)} g · ${esc(s[ma].t)}</span>`;
     const gb = state.region === 'gb', liveMode = state.mode === 'live';
-    title.textContent = `${gb ? 'GB national, measured where published, forecast otherwise' : 'South Wales, half-hourly forecast'} · ${label}`;
+    title.textContent = `${gb ? 'GB national, measured where published, forecast otherwise' : 'South Wales, half-hourly forecast'} · ${label}`; // textContent: no markup
     if (!liveMode && !gb) cap.innerHTML = '<b>The same socket, a factor of eighteen apart.</b> Forecast intensity ranged from 18 g/kWh at 09:30 to 322 g/kWh at 17:00. Source: NESO Carbon Intensity API, regional forecast, fetched 30 Sep 2026 22:05 UTC.';
-    else if (!liveMode && gb) cap.innerHTML = `<b>The same Monday, nationally.</b> Measured intensity ran from ${s[mi].v} g at ${s[mi].t} to ${s[ma].v} g at ${s[ma].t}, mean ${mean} g/kWh: lower and flatter than the South Wales forecast. A regional forecast and a national actual are different measurements of different things.`;
-    else cap.innerHTML = `<b>Today, as NESO currently has it.</b> Low ${s[mi].v} g at ${s[mi].t}, high ${s[ma].v} g at ${s[ma].t}, day mean ${mean} g/kWh${fc ? `; the last ${fc} periods (lighter bars) are still forecasts` : ''}. ${snapshot ? 'The live fetch failed, so this is the bundled snapshot; reload to try again.' : 'Fetched from the NESO API when this page loaded.'}`;
+    else if (!liveMode && gb) cap.innerHTML = `<b>The same Monday, nationally.</b> Measured intensity ran from ${num(s[mi].v)} g at ${esc(s[mi].t)} to ${num(s[ma].v)} g at ${esc(s[ma].t)}, mean ${mean} g/kWh: lower and flatter than the South Wales forecast. A regional forecast and a national actual are different measurements of different things.`;
+    else cap.innerHTML = `<b>Today, as NESO currently has it.</b> Low ${num(s[mi].v)} g at ${esc(s[mi].t)}, high ${num(s[ma].v)} g at ${esc(s[ma].t)}, day mean ${mean} g/kWh${fc ? `; the last ${fc} periods (lighter bars) are still forecasts` : ''}. ${snapshot ? 'The live fetch failed, so this is the bundled snapshot; reload to try again.' : 'Fetched from the NESO API when this page loaded.'}`;
     document.dispatchEvent(new CustomEvent('fig1:change', { detail: { series: s, mode: state.mode, region: state.region } }));
   }
 
